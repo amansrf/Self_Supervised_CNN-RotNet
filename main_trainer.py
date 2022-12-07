@@ -6,7 +6,7 @@ from jax._src.dtypes import dtype
 import jax.numpy as jnp
 import jax
 import torchvision.transforms as transforms
-from RotNet import RotNet3, RotNet4, RotNet5
+import PredNet
 import flax.linen as nn
 import optax
 from flax.training import train_state
@@ -30,6 +30,7 @@ def parse():
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--momentum", type=float, default=0.9)
     parser.add_argument("--dtype", type=str, default="fp32")
+    parser.add_argument("--transfer", action='store_true', default=False)
     args = parser.parse_args()
     return args
 
@@ -130,6 +131,9 @@ def main():
     # NOTE: Choose batch_size and workers based on system specs
     # NOTE: This dataloader requires pytorch to load the datset for convenience.
     train_loader, validation_loader, test_loader = load_data(batch_size=128, workers=4)
+
+    # TODO: Figure this part out
+    # model = PredNet(args.transfer)
     
     # --- Create the Train State Abstraction (see documentation in link below) --- #
     # Step 6: https://flax.readthedocs.io/en/latest/getting_started.html#create-train-state
