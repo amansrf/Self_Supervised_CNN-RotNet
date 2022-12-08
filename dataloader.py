@@ -55,8 +55,8 @@ def load_data(batch_size=128, workers=4):
 
     # ----------- Now Split the Loaded Dataset into Train and Validation ---------- #
     # NOTE: Here we use a 90/10 split. You can change the split below as per requirement.
-    train_dataset, validation_dataset           = torch.utils.data.random_split(train_dataset, [0.9, 0.1])
-    rot_train_dataset, rot_validation_dataset   = torch.utils.data.random_split(rot_train_dataset, [0.9, 0.1])
+    train_dataset, validation_dataset           = torch.utils.data.random_split(train_dataset, [45000, 5000])
+    rot_train_dataset, rot_validation_dataset   = torch.utils.data.random_split(rot_train_dataset, [180000, 20000])
 
     # ----------------------------- Load the Test Set ---------------------------- #
     test_dataset        = CIFAR10(root=CIFAR_DATA_DIR, train=False, download=True, transform=transform_test)
