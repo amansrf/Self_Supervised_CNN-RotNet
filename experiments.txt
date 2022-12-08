@@ -1,0 +1,11 @@
+python main.py --rotnet_arch rotnet3_feat3 --prednet_arch prednet3 --rotnet_ckpt_dir ./ckpts/rot3_feat3_pred3_sup/rotnet --prednet_ckpt_dir ./ckpts/rot3_feat3_pred3_sup/prednet --rotnet_epochs 0 &> ./logs/rot3_feat3_pred3_sup.txt
+python main.py --rotnet_arch rotnet3_feat3 --prednet_arch prednet3 --rotnet_ckpt_dir ./ckpts/rot3_feat3_pred3_unsup/rotnet --prednet_ckpt_dir ./ckpts/rot3_feat3_pred3_unsup/prednet &> ./logs/rot3_feat3_pred3_unsup.txt
+python main.py --rotnet_arch rotnet3_feat3 --prednet_arch prednet3 --rotnet_ckpt_dir ./ckpts/rot3_feat3_pred3_no_grad/rotnet --prednet_ckpt_dir ./ckpts/rot3_feat3_pred3_no_grad/prednet --no_grad &> ./logs/rot3_feat3_pred3_no_grad.txt
+
+python main.py --rotnet_arch rotnet3_feat2 --prednet_arch prednet3 --rotnet_ckpt_dir ./ckpts/rot3_feat2_pred3_unsup/rotnet --prednet_ckpt_dir ./ckpts/rot3_feat2_pred3_unsup/prednet &> ./logs/rot3_feat2_pred3_unsup.txt
+python main.py --rotnet_arch rotnet3_feat1 --prednet_arch prednet3 --rotnet_ckpt_dir ./ckpts/rot3_feat1_pred3_unsup/rotnet --prednet_ckpt_dir ./ckpts/rot3_feat1_pred3_unsup/prednet &> ./logs/rot3_feat1_pred3_unsup.txt
+
+python main.py --rotnet_arch rotnet3_feat2 --prednet_arch prednet3 --rotnet_ckpt_dir ./ckpts/rot3_feat2_pred3_no_grad/rotnet --prednet_ckpt_dir ./ckpts/rot3_feat2_pred3_no_grad/prednet --no_grad &> ./logs/rot3_feat2_pred3_no_grad.txt
+python main.py --rotnet_arch rotnet3_feat1 --prednet_arch prednet3 --rotnet_ckpt_dir ./ckpts/rot3_feat1_pred3_no_grad/rotnet --prednet_ckpt_dir ./ckpts/rot3_feat1_pred3_no_grad/prednet --no_grad &> ./logs/rot3_feat1_pred3_no_grad.txt
+
+python main.py --rotnet_arch rotnet3_feat3 --prednet_arch prednet0 --rotnet_ckpt_dir ./ckpts/rot3_feat3_pred0_unsup/rotnet --prednet_ckpt_dir ./ckpts/rot3_feat3_pred0_unsup/prednet &> ./logs/rot3_feat3_pred0_unsup.txt
