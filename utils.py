@@ -55,15 +55,21 @@ def rotate_image(images):
         rotated copies of each image and rotation labels of length (4*batch_size).
     """
     batch_size, _, _, _ = images.shape
-    images_90  = jnp.rot90(images, 1, (-3,-2))
-    images_180 = jnp.rot90(images, 2, (-3,-2))
-    images_270 = jnp.rot90(images, 3, (-3,-2))
+    # TODO: Rotate images with jnp
+    ################# Your Code Starts Here #######################################
+    # hint: 1. You should process all the data with jnp instead of np
+    #       2. You might find jnp.rot90 helpful for rotating images
+    #       3. You might find jnp.vstack and jnp.hstack helpful for stacking data
+    images_90  = ...
+    images_180 = ...
+    images_270 = ...
 
     # ------------------------- Stack the rotated images ------------------------- #
-    rotated_image_set = jnp.vstack((images, images_90.copy(), images_180.copy(), images_270.copy()))
+    rotated_image_set = ...
 
     # ------------------------ Create the rotation labels ------------------------ #
-    rotation_labels = jnp.hstack((jnp.zeros(batch_size), jnp.ones(batch_size), 2*jnp.ones(batch_size), 3*jnp.ones(batch_size)))
-
+    rotation_labels = ...
+    
+    ################# Your Code Ends Here #######################################
     return np.array(rotated_image_set), np.array(rotation_labels)
   
