@@ -25,7 +25,7 @@ class PredNetBlock(nn.Module):
     @nn.compact
     def __call__(self, x):
        """
-            TODO: Implement forward Pass for PredNetBlock. 
+            TODO: Implement forward Pass for PredNetBlock.
             Each block should contains:
                 1. a convolutional layer
                 2. a batch norm layer. hint: use the norm function defined above
@@ -57,7 +57,7 @@ class Classifier(nn.Module):
     @nn.compact
     def __call__(self, x, train):
         norm = partial(nn.BatchNorm, use_running_average=not train, dtype=self.dtype)
-        # TODO: complete the forward pass by ddding self.num_blocks of PredNetBlocks
+        # TODO: complete the forward pass by adding self.num_blocks of PredNetBlocks
         ############################## Your Code Starts Here #########################################
         # hint: We did something similar while implementing RotNet
             
@@ -66,12 +66,11 @@ class Classifier(nn.Module):
         return x
 
 class PredNet(nn.Module):
-    """ The PredNet class contains two submodules: backbone and Classifier.
-        The output of Features submodule will be extracted for transfer learning.
+    """ The PredNet class contains two submodules: Backbone and Classifier.
 
     Args:
+        backbone (nn.Model): The Pretrained (or not!) model to be used as the first stage of the final model. 
         cnn_channels (int): number of channels for all Convolutional layers (We keep them the same for simplicity)
-        num_blocks_features (int): number of RotNetBlocks to include in Features submodule
         num_blocks_classifier (int): number of RotNetBlocks to include in Classifier submodule
         num_classes (int): number of classes (used in the last layer of Classifier submodule)
         dtype (dtypedef): the type of data the model will be dealing with
@@ -88,7 +87,7 @@ class PredNet(nn.Module):
         # TODO: setup the Classifier module of PredNet
         ############################## Your Code Starts Here #########################################
         # hint: We did something similar while implementing RotNet
-        pass  
+        pass 
             
         ############################## Your Code Ends Here #########################################
 
@@ -107,7 +106,7 @@ def prednet_constructor(model_arch, backbone):
     """ Creates a PredNet model with a given backbone module, whose structure is specified by model_arch.
 
     Args:
-        backbone: 
+        backbone (nn.Model): The Pretrained (or not) model to be used as the first stage of the final model. 
         
         model_arch (str):
             A string specifying the RotNet architecture. For example, 'rotnet3_feat2' means the RotNet contains three RotNetBlocks,
@@ -122,7 +121,7 @@ def prednet_constructor(model_arch, backbone):
     
     # TODO: return a PredNet with above arguments
     ############################## Your Code Starts Here #########################################
-    # hint: We did something similar while implementing RotNet
+    # hint: We did something similar while implementing RotNet. Look at the 
     
     return ...        
     ############################## Your Code Ends Here #########################################

@@ -80,7 +80,7 @@ class Classifier(nn.Module):
     def __call__(self, x, train):
         norm = partial(nn.BatchNorm, use_running_average=not train, dtype=self.dtype)
         output = x
-        # TODO: complete the forward pass by ddding self.num_blocks of RotNetBlocks
+        # TODO: complete the forward pass by adding self.num_blocks of RotNetBlocks
         ############################## Your Code Starts Here #########################################
         # hint: Features class should give you an idea how to implement it    
             

@@ -55,13 +55,19 @@ def rotate_image(images):
         rotated copies of each image and rotation labels of length (4*batch_size).
     """
     batch_size, _, _, _ = images.shape
-    # TODO: Rotate images with jnp
+    # TODO: Rotate images with jnp. 
+    # Find more details in the paper (https://arxiv.org/pdf/1803.07728.pdf)
     ################# Your Code Starts Here #######################################
     # hint: 1. You should process all the data with jnp instead of np
     #       2. You might find jnp.rot90 helpful for rotating images
     #       3. You might find jnp.vstack and jnp.hstack helpful for stacking data
+    #       4. You may find it useful to print the types of things and asseting
+    #           shapes as well.
+    # Rotate the images by 90
     images_90  = ...
+    # Rotate the images by 180
     images_180 = ...
+    # Rotate the images by 270
     images_270 = ...
 
     # ------------------------- Stack the rotated images ------------------------- #
