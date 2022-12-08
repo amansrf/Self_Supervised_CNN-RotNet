@@ -24,19 +24,10 @@ class RotNetBlock(nn.Module):
 
     @nn.compact
     def __call__(self, x):
-        """
-            TODO: Implement forward Pass for RotNetBlock.
-            Each block should contains:
-                1. a convolutional layer
-                2. a batch norm layer. hint: use the norm function defined above
-                3. a relu layer
-            hint: Check out how to define a module using nn.compact here: https://flax.readthedocs.io/en/latest/guides/setup_or_nncompact.html
-        """
-       ############################## Your Code Starts Here #########################################
-        
-    
-    
-       ############################## Your Code Ends Here #########################################
+        x = nn.Conv(features=self.cnn_channels, kernel_size=(3, 3), dtype=self.dtype, kernel_init=self.kernel_init)(x)
+        x = self.norm()(x)
+        x = nn.relu(x)
+        return x
     
 class Features(nn.Module):
     """ Features module of a RotNet. A Features module consist of self.num_blocks of RotNetBlock
@@ -79,15 +70,11 @@ class Classifier(nn.Module):
     @nn.compact
     def __call__(self, x, train):
         norm = partial(nn.BatchNorm, use_running_average=not train, dtype=self.dtype)
-        output = x
-        # TODO: complete the forward pass by adding self.num_blocks of RotNetBlocks
-        ############################## Your Code Starts Here #########################################
-        # hint: Features class should give you an idea how to implement it    
-            
-        ############################## Your Code Ends Here #########################################
-        output = output.reshape(output.shape[0], -1)
-        output = nn.Dense(features=self.num_classes, dtype=self.dtype, kernel_init=self.kernel_init)(output)
-        return output
+        for _ in range(self.num_blocks):
+            x = RotNetBlock(cnn_channels=self.cnn_channels, norm=norm, dtype=self.dtype, kernel_init=self.kernel_init)(x)
+        x = x.reshape(x.shape[0], -1)
+        x = nn.Dense(features=self.num_classes, dtype=self.dtype, kernel_init=self.kernel_init)(x)
+        return x
 
 class RotNet(nn.Module):
     """ The RotNet class contains two submodules: Features and Classifier.
@@ -115,17 +102,9 @@ class RotNet(nn.Module):
         self.classifier = Classifier(self.cnn_channels, self.num_blocks_classifier, self.num_classes, self.dtype, self.kernel_init)
 
     def __call__(self, x, train):
-        # TODO: Implement the construction and forward pass for RotNet. Check above link for hints.
-        ############################## Your Code Starts Here #########################################
-        # hint: Think carefully about the network structures: 
-        #           1. The input should firstly be forwarded by Features module
-        #           2. Then the result should be forwarded by Classifier module
-        
-        
-        
-        return None    
-        ############################## Your Code Ends Here #########################################
-        
+        x = self.features(x, train)
+        x = self.classifier(x, train)
+        return x
 
 def rotnet_constructor(model_arch):
     """ Creates a RotNet model whose structure is specified by model_arch.
