@@ -29,16 +29,17 @@ def parse():
     parser.add_argument("--rotnet_arch", type=str, default="rotnet3_feat3", help="RotNet architecture to use")
     parser.add_argument("--prednet_arch", type=str, default="prednet3", help="PredNet architecture to use")
     parser.add_argument("--rotnet_ckpt_dir", type=str, default="./ckpts/rotnet", help="directory to save RotNet checkpoints")
-    parser.add_argument("--prednet_ckpt_dir", type=str, default="./ckpts/prednet", help="directory to save RotNet checkpoints")
-    parser.add_argument("--transfer", action="store_true", default=False, help="load pretrained RotNet if set to True")
-    parser.add_argument("--ckpt_epoch", default=0, type=int, metavar="N", help="epoch number to load RotNet checkpoint")
-    parser.add_argument("--rotnet_epochs", default=10, type=int, metavar="N", help="number of RotNet epochs to run")
-    parser.add_argument("--prednet_epochs", default=10, type=int, metavar="N", help="number of PredNet epochs to run")
+    parser.add_argument("--prednet_ckpt_dir", type=str, default="./ckpts/prednet", help="directory to save PredNet checkpoints")
+    parser.add_argument("--rotnet_ckpt_epoch", default=0, type=int, metavar="N", help="continue to train RotNet from the epoch")
+    parser.add_argument("--prednet_ckpt_epoch", default=0, type=int, metavar="N", help="continue to train PredNet from the epoch")
+    parser.add_argument("--rotnet_epochs", default=10, type=int, metavar="N", help="number of total epochs to train RotNet")
+    parser.add_argument("--prednet_epochs", default=10, type=int, metavar="N", help="number of total epochs to train PredNet")
+    parser.add_argument("--no_grad", action="store_true", default=False, help="disable gradient flow in RotNet if set to True")
     parser.add_argument("--batch_size", default=128, type=int, metavar="N", help="batch size per process")
     parser.add_argument("--workers", default=4, type=int, metavar="N", help="number of data loading workers")
-    parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--momentum", type=float, default=0.9)
-    parser.add_argument("--verbose", action="store_true", default=False)
+    parser.add_argument("--lr", type=float, default=1e-3, help="learning rate of the optimizer")
+    parser.add_argument("--momentum", type=float, default=0.9, help="momentum of the optimizer")
+    parser.add_argument("--verbose", action="store_true", default=False, help="print model and params info")
     args = parser.parse_args()
     return args
 
@@ -140,7 +141,7 @@ def main():
     rng = jax.random.PRNGKey(0)
     print("Random Key Generated")
 
-    # ------------------------------ Define Network ------------------------------ #
+    # -------------------------- Create the RotNet Model ------------------------- #
     # Define network: https://flax.readthedocs.io/en/latest/getting_started.html#define-network
     rotnet_model = rotnet_constructor(args.rotnet_arch)
     print("Network Defined")
@@ -168,47 +169,46 @@ def main():
     else:
         print("RotNet Checkpoint Directory Found")
 
-    # --------------- Load Existing Checkpoint of Pretrained RotNet -------------- #
-    if args.transfer:
+    # -------------------- Load Existing Checkpoint of RotNet -------------------- #
+    if args.rotnet_ckpt_epoch > 0:
         rotnet_state = checkpoints.restore_checkpoint(
-            ckpt_dir=rotnet_ckpt_dir, target=rotnet_state, step=args.ckpt_epoch
+            ckpt_dir=rotnet_ckpt_dir, target=rotnet_state, step=args.rotnet_ckpt_epoch
         )
-        print("RotNet Checkpoint Loaded for Transfer Learning")
+        print("RotNet Checkpoint Loaded")
 
-    # ------------------------ Otherwise Train the RotNet ------------------------ #
-    else:
-        print("Starting RotNet Training Loop")
-        for epoch in tqdm(range(args.ckpt_epoch + 1, args.rotnet_epochs + 1)):
-            # ------------------------------- Training Step ------------------------------ #
-            # Training step: https://flax.readthedocs.io/en/latest/getting_started.html#training-step
-            rotnet_state, train_epoch_metrics = train_epoch(
-                rotnet_state, rot_train_loader, num_classes=4
-            )
+    # ----------------------------- Train the RotNet ----------------------------- #
+    print("Starting RotNet Training Loop")
+    for epoch in tqdm(range(args.rotnet_ckpt_epoch + 1, args.rotnet_epochs + 1)):
+        # ------------------------------- Training Step ------------------------------ #
+        # Training step: https://flax.readthedocs.io/en/latest/getting_started.html#training-step
+        rotnet_state, train_epoch_metrics = train_epoch(
+            rotnet_state, rot_train_loader, num_classes=4
+        )
 
-            # Print training metrics every epoch
-            print(
-                f"train epoch: {epoch}, \
-                loss: {train_epoch_metrics['loss']:.4f}, \
-                accuracy:{train_epoch_metrics['accuracy']*100:.2f}%"
-            )
+        # Print training metrics every epoch
+        print(
+            f"train epoch: {epoch}, \
+            loss: {train_epoch_metrics['loss']:.4f}, \
+            accuracy:{train_epoch_metrics['accuracy']*100:.2f}%"
+        )
 
-            # ------------------------------ Evaluation Step ----------------------------- #
-            # Evaluation step: https://flax.readthedocs.io/en/latest/getting_started.html#evaluation-step
-            validation_loss, _ = eval_model(rotnet_state, rot_validation_loader, num_classes=4)
+        # ------------------------------ Evaluation Step ----------------------------- #
+        # Evaluation step: https://flax.readthedocs.io/en/latest/getting_started.html#evaluation-step
+        validation_loss, _ = eval_model(rotnet_state, rot_validation_loader, num_classes=4)
 
-            # Print validation metrics every epoch
-            print(f"validation loss: {validation_loss:.4f}")
+        # Print validation metrics every epoch
+        print(f"validation loss: {validation_loss:.4f}")
 
-            # ---------------------------- Saving Checkpoints ---------------------------- #
-            # ---- https://flax.readthedocs.io/en/latest/guides/use_checkpointing.html --- #
-            checkpoints.save_checkpoint(
-                ckpt_dir=rotnet_ckpt_dir, target=rotnet_state, step=epoch, overwrite=True, keep=args.rotnet_epochs
-            )
+        # ---------------------------- Saving Checkpoints ---------------------------- #
+        # ---- https://flax.readthedocs.io/en/latest/guides/use_checkpointing.html --- #
+        checkpoints.save_checkpoint(
+            ckpt_dir=rotnet_ckpt_dir, target=rotnet_state, step=epoch, overwrite=True, keep=args.rotnet_epochs
+        )
 
-            # Print test metrics every nth epoch
-            if epoch % 10 == 0:
-                _, test_accuracy = eval_model(rotnet_state, rot_test_loader, num_classes=4)
-                print(f"test_accuracy: {test_accuracy:.2f}")
+        # Print test metrics every nth epoch
+        if epoch % 5 == 0:
+            _, test_accuracy = eval_model(rotnet_state, rot_test_loader, num_classes=4)
+            print(f"test_accuracy: {test_accuracy:.2f}")
 
     # ---- https://flax.readthedocs.io/en/latest/guides/transfer_learning.html --- #
     # ----------------------------- Extract Backbone ----------------------------- #
@@ -227,22 +227,26 @@ def main():
     prednet_params['backbone']  = backbone_model_variables['params']
     prednet_params              = freeze(prednet_params)
     
-    prednet_batch_stats              = prednet_batch_stats.unfreeze()
-    prednet_batch_stats['backbone']  = backbone_model_variables['batch_stats']
-    prednet_batch_stats              = freeze(prednet_batch_stats)
+    if not args.no_grad:
+        prednet_batch_stats              = prednet_batch_stats.unfreeze()
+        prednet_batch_stats['backbone']  = backbone_model_variables['batch_stats']
+        prednet_batch_stats              = freeze(prednet_batch_stats)
     
     # -------------------------- Define How to Backprop -------------------------- #
-    partition_optimizers = {'trainable': optax.sgd(args.lr, args.momentum), 'frozen': optax.set_to_zero()}
-    prednet_param_partitions = freeze(traverse_util.path_aware_map(
-        lambda path, _: 'frozen' if 'backbone' in path else 'trainable', prednet_params
-    ))
+    if args.no_grad:
+        partition_optimizers = {'trainable': optax.sgd(args.lr, args.momentum), 'frozen': optax.set_to_zero()}
+        prednet_param_partitions = freeze(traverse_util.path_aware_map(
+            lambda path, _: 'frozen' if 'backbone' in path else 'trainable', prednet_params
+        ))
+        tx = optax.multi_transform(partition_optimizers, prednet_param_partitions)
     
-    tx = optax.multi_transform(partition_optimizers, prednet_param_partitions)
-    
-    # ---------------- Visualize param_partitions to double check ---------------- #
-    if args.verbose:
-        flat = list(traverse_util.flatten_dict(prednet_param_partitions).items())
-        freeze(traverse_util.unflatten_dict(dict(flat[:2] + flat[-2:])))
+        # ---------------- Visualize param_partitions to double check ---------------- #
+        if args.verbose:
+            flat = list(traverse_util.flatten_dict(prednet_param_partitions).items())
+            freeze(traverse_util.unflatten_dict(dict(flat[:2] + flat[-2:])))
+            
+    else:
+        tx = optax.sgd(args.lr, args.momentum)
     
     # ---------------------- Create Train State for PredNet ---------------------- #
     prednet_state = TrainState.create(
@@ -257,9 +261,16 @@ def main():
     else:
         print("PredNet Checkpoint Directory Found")
     
+    # -------------------- Load Existing Checkpoint of PredNet ------------------- #
+    if args.prednet_ckpt_epoch > 0:
+        prednet_state = checkpoints.restore_checkpoint(
+            ckpt_dir=prednet_ckpt_dir, target=prednet_state, step=args.prednet_ckpt_epoch
+        )
+        print("PredNet Checkpoint Loaded")
+    
     # ----------------------------- Train the PredNet ---------------------------- #
     print("Starting PredNet Training Loop")
-    for epoch in tqdm(range(1, args.prednet_epochs + 1)):
+    for epoch in tqdm(range(args.prednet_ckpt_epoch + 1, args.prednet_epochs + 1)):
         # ------------------------------- Training Step ------------------------------ #
         # Training step: https://flax.readthedocs.io/en/latest/getting_started.html#training-step
         prednet_state, train_epoch_metrics = train_epoch(
@@ -287,7 +298,7 @@ def main():
         )
 
         # Print test metrics every nth epoch
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             _, test_accuracy = eval_model(prednet_state, test_loader, num_classes=10)
             print(f"test_accuracy: {test_accuracy:.2f}")
 

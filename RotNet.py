@@ -45,6 +45,7 @@ class Classifier(nn.Module):
         norm = partial(nn.BatchNorm, use_running_average=not train, dtype=self.dtype)
         for _ in range(self.num_blocks):
             x = RotNetBlock(cnn_channels=self.cnn_channels, norm=norm, dtype=self.dtype, kernel_init=self.kernel_init)(x)
+        x = x.reshape(x.shape[0], -1)
         x = nn.Dense(features=self.num_classes, dtype=self.dtype, kernel_init=self.kernel_init)(x)
         return x
 
@@ -64,7 +65,6 @@ class RotNet(nn.Module):
 
     def __call__(self, x, train):
         x = self.features(x, train)
-        x = x.reshape(x.shape[0], -1)
         x = self.classifier(x, train)
         return x
 
