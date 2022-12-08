@@ -194,10 +194,10 @@ def main():
 
         # ------------------------------ Evaluation Step ----------------------------- #
         # Evaluation step: https://flax.readthedocs.io/en/latest/getting_started.html#evaluation-step
-        validation_loss, _ = eval_model(rotnet_state, rot_validation_loader, num_classes=4)
+        validation_loss, validation_accuracy = eval_model(rotnet_state, rot_validation_loader, num_classes=4)
 
         # Print validation metrics every epoch
-        print(f"validation loss: {validation_loss:.4f}")
+        print(f"validation loss: {validation_loss:.4f}, validation accuracy:{validation_accuracy*100:.2f}%")
 
         # ---------------------------- Saving Checkpoints ---------------------------- #
         # ---- https://flax.readthedocs.io/en/latest/guides/use_checkpointing.html --- #
@@ -208,7 +208,9 @@ def main():
         # Print test metrics every nth epoch
         if epoch % 5 == 0:
             _, test_accuracy = eval_model(rotnet_state, rot_test_loader, num_classes=4)
-            print(f"test_accuracy: {test_accuracy:.2f}")
+            print("====================")
+            print(f"test_accuracy: {test_accuracy*100:.2f}%")
+            print("====================")
 
     # ---- https://flax.readthedocs.io/en/latest/guides/transfer_learning.html --- #
     # ----------------------------- Extract Backbone ----------------------------- #
@@ -286,10 +288,10 @@ def main():
 
         # ------------------------------ Evaluation Step ----------------------------- #
         # Evaluation step: https://flax.readthedocs.io/en/latest/getting_started.html#evaluation-step
-        validation_loss, _ = eval_model(prednet_state, validation_loader, num_classes=10)
+        validation_loss, validation_accuracy = eval_model(prednet_state, validation_loader, num_classes=10)
 
         # Print validation metrics every epoch
-        print(f"validation loss: {validation_loss:.4f}")
+        print(f"validation loss: {validation_loss:.4f}, validation accuracy:{validation_accuracy*100:.2f}%")
 
         # ---------------------------- Saving Checkpoints ---------------------------- #
         # ---- https://flax.readthedocs.io/en/latest/guides/use_checkpointing.html --- #
@@ -300,7 +302,9 @@ def main():
         # Print test metrics every nth epoch
         if epoch % 5 == 0:
             _, test_accuracy = eval_model(prednet_state, test_loader, num_classes=10)
-            print(f"test_accuracy: {test_accuracy:.2f}")
+            print("====================")
+            print(f"test_accuracy: {test_accuracy*100:.2f}%")
+            print("====================")
 
 if __name__ == "__main__":
     main()

@@ -54,9 +54,7 @@ class PredNet(nn.Module):
 
 def prednet_constructor(model_arch, backbone):
     cnn_channels = 128
-    if model_arch == 'prednet3':
-        num_blocks_classifier = 3
-    else:
-        raise ValueError()
+    num_blocks_classifier = int(model_arch[7])
+    num_classes = 10
     
-    return PredNet(backbone, cnn_channels, num_blocks_classifier, 10)
+    return PredNet(backbone, cnn_channels, num_blocks_classifier, num_classes)

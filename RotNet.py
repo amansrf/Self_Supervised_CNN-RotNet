@@ -70,9 +70,7 @@ class RotNet(nn.Module):
 
 def rotnet_constructor(model_arch):
     cnn_channels = 64
-    if model_arch == 'rotnet3_feat3':
-        num_blocks, num_blocks_features = 3, 3
-    else:
-        raise ValueError()
+    num_blocks, num_blocks_features = int(model_arch[6]), int(model_arch[12])
+    num_classes = 4
     
-    return RotNet(cnn_channels, num_blocks_features, num_blocks - num_blocks_features, 4)
+    return RotNet(cnn_channels, num_blocks_features, num_blocks - num_blocks_features, num_classes)
